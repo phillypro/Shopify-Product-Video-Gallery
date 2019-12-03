@@ -24,12 +24,12 @@
   .sticky-sidebar-{{ product.id }} {
   will-change: min-height;
   }
-  .sticky-sidebar-{{ product.id }} .sidebar__inner {
+  .sticky-sidebar-{{ product.id }} .sidebar_inner {
       transform: translate(0, 0); /* For browsers don't support translate3d. */
     transform: translate3d(0, 0, 0);
     will-change: position, transform;
   }
-  .sticky-sidebar-{{ product.id }} .sidebar__inner > * {
+  .sticky-sidebar-{{ product.id }} .sidebar_inner > * {
     padding:0;
     margin:0;
     float:none; 
@@ -63,7 +63,7 @@
            <div class="swiper-wrapper">  
            {% for image in product.images %}
             <div class="swiper-slide">
-             <a href="{{ image | product_img_url: 'master' }}" data-fslightbox="product-{{ product.id }}" data-fslightbox>
+             <a href="{{ image | product_img_url: 'master' }}" data-fancybox="product-{{ product.id }}" data-fancybox>
               <div class="thumb"> 
                 <img src="{{ image | product_img_url: 'large' }}" />
                </div>
@@ -92,23 +92,29 @@ var callbackProduct_Video_Gallery = function(){
     style.rel = "stylesheet";
     style.href = 'https://cdn.jsdelivr.net/npm/swiper@5.2.1/css/swiper.min.css';
     document.getElementsByTagName("head")[0].appendChild(style);
+  }
+  if(!window.jQuery.fancybox) {
+    // add script
+    var script = document.createElement("script");
+    script.type = "text/javascript";   
+    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js';
+    document.getElementsByTagName("head")[0].appendChild(script);  
     setTimeout(function() {
-      console.log(window);
-    },400);
+    console.log(window);
+    })
+    // add style
+    var style = document.createElement("link");
+    style.type = "text/css";  
+    style.rel = "stylesheet";
+    style.href = 'https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.css';
+    document.getElementsByTagName("head")[0].appendChild(style); 
   }
-  if(!window.FsLightbox) {
+  if(!window.stickyKit) {
     // add script
     var script = document.createElement("script");
     script.type = "text/javascript";   
-    script.src = 'https://cdn.jsdelivr.net/gh/phillypro/Shopify-Product-Video-Gallery/Assets/fslightbox.js';
-    document.getElementsByTagName("head")[0].appendChild(script);  
-  }
-  if(!window.StickySidebar) {
-    // add script
-    var script = document.createElement("script");
-    script.type = "text/javascript";   
-    script.src = 'https://cdn.jsdelivr.net/gh/abouolia/sticky-sidebar/dist/sticky-sidebar.min.js';
-    document.getElementsByTagName("head")[0].appendChild(script);  
+    script.src = 'https://cdn.jsdelivr.net/gh/phillypro/Shopify-Product-Video-Gallery/Assets/sticky-kit.js';
+    document.getElementsByTagName("head")[0].appendChild(script); 
   }
   
 };
@@ -127,7 +133,7 @@ if (
   
   
 function deferProduct_Video_gallery(methodProduct_Video_gallery) {
-    if (window.jQuery && window.Swiper && window.FsLightbox && window.StickySidebar) {
+    if (window.jQuery && window.Swiper && window.stickyKit && window.jQuery.fancybox) {
         methodProduct_Video_gallery();
     } else {
         setTimeout(function() { deferProduct_Video_gallery(methodProduct_Video_gallery) }, 50);
@@ -135,7 +141,7 @@ function deferProduct_Video_gallery(methodProduct_Video_gallery) {
 }
 deferProduct_Video_gallery(function () {  
 
-  
+
 {% if section.settings.sticky %}
 // wrap the sidebar  
 var videobar = document.getElementById('Product-Video-Gallery-{{ product.id }}').parentElement.parentElement;  
@@ -152,7 +158,7 @@ con.classList.add('sticky-sidebar-container-{{ product.id }}','sticky-sidebar-co
 var wrapper = document.createElement('div');
 sidebar.parentNode.insertBefore(wrapper, sidebar);
 wrapper.appendChild(sidebar);  
-wrapper.classList.add('sidebar__inner');  
+wrapper.classList.add('sidebar_inner');  
 var wrapper2 = document.createElement('div'); 
 wrapper.parentNode.insertBefore(wrapper2, wrapper);  
 wrapper2.appendChild(wrapper);   
@@ -201,14 +207,15 @@ var getParents = function ( elem, selector ) {
                       
 // get rid of ancestor transforms
 var allParents = getParents(sidebar.parentNode);
-  allParents.forEach(function(element) {
+killtransform(allParents);
+function killtransform(allofem) {
+  allofem.forEach(function(element) {
     elementstyle = getComputedStyle(element).WebkitTransform;
     if(elementstyle !== 'none') {
-    console.log('none');
     element.style.WebkitTransform = "none" ;
     }
   });
-                      
+}                 
 var getParents = function ( elem, selector ) {
 
 	// Element.matches() polyfill
@@ -288,11 +295,10 @@ function startSlider() {
       slidesPerView: 'auto',
       loop: false,
       direction: 'horizontal',
-      freeMode: true,
+     // freeMode: true,
       loopedSlides: 5, //looped slides should be the same
-      watchSlidesVisibility: true,
-      watchSlidesProgress: true,
-      });                                 
+      cssMode: true
+      });   
 } 
   
   
@@ -308,28 +314,32 @@ var setViewportWidth = function () {
 // Log the viewport width into the console
 var logWidth = function () {
 	if (viewportWidth > 1022) {
+      
     {% if sticky %}  
-    var wrapper2sticky = new StickySidebar( wrapper2, {
-    topSpacing: 20,
-    bottomSpacing: 20,
-    containerSelector: '.sticky-sidebar-container-{{ product.id }}',
-    innerWrapperSelector: '.sticky-sidebar-container-{{ product.id }} .sidebar__inner'
-    });
+     $('.sticky-sidebar-{{ product.id }} .sidebar_inner').stick_in_parent();
+     setTimeout(function() {
+     var sidebar = document.getElementById('Product-Video-Gallery-{{ product.id }}').parentElement.parentElement.nextElementSibling;   
+     var allParents = getParents(sidebar.parentNode);
+     killtransform(allParents); 
+     $('.sticky-sidebar-{{ product.id }} .sidebar_inner').trigger("sticky_kit:recalc");
+     })
     {% endif %}  
+     
+     
     var swiperdiv = document.getElementById('Product-Video-Gallery-{{ product.id }}').nextElementSibling.querySelector('.gallery-thumbs');
     if(swiperdiv.swiper) {
          swiperdiv.swiper.destroy();                      
-     }  
+    }  
+       
 	} else {
-		console.log('Small viewport');
-      startSlider();
-      {% if sticky %}
-      var wrapper2sticky = document.querySelector('.sticky-sidebar-{{ product.id }}');
-      if(wrapper2sticky) {   
-        console.log(wrapper2sticky.data);
-        wrapper2sticky.destroy();
-        console.log(wrapper2sticky);
+      var swiperdiv = document.getElementById('Product-Video-Gallery-{{ product.id }}').nextElementSibling.querySelector('.gallery-thumbs');
+      if(swiperdiv.swiper) {
+         swiperdiv.swiper.destroy();
+         swiperdiv.swiper = undefined;
       }
+        startSlider();
+      {% if sticky %}
+     $('.sticky-sidebar-{{ product.id }} .sidebar_inner').trigger("sticky_kit:detach");
       {% endif %}
 	}
 }
@@ -347,9 +357,10 @@ window.addEventListener('resize', function () {
   
   
   
-  
+ 
   
 });  
+  
 </script>            
 
 {% schema %}
@@ -580,6 +591,9 @@ window.addEventListener('resize', function () {
     height: auto;
     opacity: 1;
     z-index: 99;
+                            @include bp(phablet) {
+                              max-width: 40%;
+                            }
                             & path {
                              fill:#fff;
                             }
@@ -607,7 +621,9 @@ window.addEventListener('resize', function () {
 			}
 		}
 	}
-}
+}             
+             
+             
 {% endstylesheet %}
 
 {% javascript %}
