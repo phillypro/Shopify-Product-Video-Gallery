@@ -100,7 +100,7 @@ var callbackProduct_Video_Gallery = function(){
     script.src = 'https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js';
     document.getElementsByTagName("head")[0].appendChild(script);  
     setTimeout(function() {
-    console.log(window);
+ 
     })
     // add style
     var style = document.createElement("link");
@@ -269,7 +269,7 @@ var getParents = function ( elem, selector ) {
   videowrap.addEventListener('click', clickMute)  
   
   function clickMute() {
-    console.log(this);
+ 
     if(!this.classList.contains('unmute')){
      this.classList.add('unmute');
      this.querySelector('video').muted = false;
